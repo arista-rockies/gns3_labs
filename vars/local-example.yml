@@ -1,0 +1,26 @@
+---
+# this is the url, fqdn or ip of your gns3 srver
+gns3_url: "http://192.168.122.89"
+# the port to use to connect to the server.  80 is probably the sensible choice, but 3080 may be needed for older installs
+gns3_port: 80
+# start/stop strategy for nodes.  valid options are "all" or "one_by_one"
+gns3_nodes_strategy: all
+
+# this string is prepended to all created labs locally.  default is the empty string, '' if not defined
+# the default project name will be
+#   [PREFIX]RockiesLab-[image.type]
+#PREFIX: "someString"
+
+# modify the name variables below to reflect the installed/desired gns3 templates to use for each image type.
+#   do not change other variables
+images:
+  ceos:
+    name: "ceos-lab 4.28.0F"
+    interfacePrefix: "eth"
+    type: "ceos"
+    managementPort: "eth0"
+  veos:
+    name: "Arista vEOS 4.27.4M"
+    interfacePrefix: "Ethernet"
+    type: "veos"
+    managementPort: "Management1"

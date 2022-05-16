@@ -1,0 +1,14 @@
+---
+collections:
+  # installing collecitons from either tar, or git does not work in ansible 2.9.
+  #   oddly one can install from tarball from the cli, just not in requirements
+  #   using $> ansible-galaxy collection install test.tgz
+#
+#  - name: fatpelt.gns3
+#    source: https://github.com/fatpelt/ansible-collection-gns3.git
+#    version: master
+#    type: git
+#
+  - name: https://github.com/fatpelt/ansible-collection-gns3.git
+    type: git
+    version: master

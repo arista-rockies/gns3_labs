@@ -1,0 +1,63 @@
+---
+- name: labScript
+  hosts: localhost
+  gather_facts: false
+
+  collections:
+    - davidban77.gns3
+
+  tasks:
+    # we want to install the gns3fy pip package only if it's not installed.  get a list of installed pips
+    - community.general.pip_package_info:
+      register: pips
+      no_log: true
+
+    - name: installgns3fy
+      pip:
+        name:
+          - git+https://github.com/davidban77/gns3fy
+      when: "'gns3fy' not in pips.packages.pip"
+
+    # load in our local variable settings which gives us the gns3 server ip and other sundry variables
+    - name: loadLocalSettings
+      ansible.builtin.include_vars:
+        file: "vars/local.yml"
+      no_log: true
+
+    # because we can't set and use a variable in the same set_fact we need to have a separate task
+    #   to default these values
+    - name: setImageType
+      set_fact:
+        imageType: "{{ imageType | default('ceos') }}"
+        execute: "{{ execute | default('create') }}"
+      no_log: True
+
+    # pull out a single image from the images dict loaded from local.yml
+    - name: chooseImage
+      set_fact:
+        image: "{{ {} | combine((imageType in images) | ternary(images[imageType], images.ceos)) }}"
+      no_log: True
+
+    # load the lab and fill in any variable substituions
+    - name: loadLab
+      ansible.builtin.include_vars:
+        file: "labs/{{ lab }}.yml"
+      no_log: true
+
+    - name: Operation
+      debug:
+        msg: "Running {{ execute }} for Lab: {{ gns3_project_name }}"
+
+    # call the right role to either create or delete the lab
+    - name: create
+      when: execute == "create"
+      block:
+        - import_role:
+            name: create_lab
+
+    - name: delete
+      when: execute == "delete"
+      block:
+        - import_role:
+            name: delete_lab
+
