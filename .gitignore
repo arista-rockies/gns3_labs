@@ -1,3 +1,4 @@
 local.yml
 ansible_collections
+*.swp
 

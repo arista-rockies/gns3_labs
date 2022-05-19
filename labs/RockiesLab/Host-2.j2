@@ -1,0 +1,48 @@
+no aaa root
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model ribd
+!
+hostname Host-2
+!
+spanning-tree mode mstp
+!
+interface Ethernet1
+   description Leaf-2_eth5
+   switchport mode trunk
+!
+interface Ethernet2
+!
+interface Ethernet3
+!
+interface Ethernet4
+!
+interface Ethernet5
+!
+interface Ethernet6
+!
+interface Ethernet7
+!
+interface Ethernet8
+!
+interface Ethernet9
+!
+interface Ethernet10
+!
+interface Ethernet11
+!
+interface Ethernet12
+!
+interface {{ image.managementPort }}
+!
+{% if image.type == 'ceos' %}
+event-handler renameInterfaces
+   trigger on-boot
+   action bash bash /mnt/flash/renameInterfaces.sh
+   delay 30
+!
+{% endif %}
+no ip routing
+!
+end

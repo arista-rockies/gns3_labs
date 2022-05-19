@@ -1,0 +1,90 @@
+no aaa root
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model multi-agent
+!
+hostname Leaf-3A
+!
+spanning-tree mode mstp
+no spanning-tree vlan-id 4093-4094
+!
+vlan 4093
+   name iBGP_Peering
+   trunk group MLAG_Peer_Link
+!
+vlan 4094
+   name MLAG_Peering
+   trunk group MLAG_Peer_Link
+!
+interface Port-Channel5
+   description Host-3
+   switchport mode trunk
+   mlag 5
+!
+interface Port-Channel2000
+   description MLAG_Peer_Link
+   switchport mode trunk
+   switchport trunk group MLAG_Peer_Link
+!
+interface Ethernet1
+   description Spine-1_eth4
+   no switchport
+   ip address 10.1.3.2/30
+!
+interface Ethernet2
+   description Spine-2_eth4
+   no switchport
+   ip address 10.2.3.2/30
+!
+interface Ethernet3
+!
+interface Ethernet4
+!
+interface Ethernet5
+   description Host-3_eth1
+   channel-group 5 mode active
+!
+interface Ethernet6
+!
+interface Ethernet7
+   description Outside
+!
+interface Ethernet8
+   description Leaf-3B_eth8
+   channel-group 2000 mode active
+!
+interface Loopback0
+   ip address 10.0.3.1/32
+!
+interface Loopback1
+   ip address 10.0.3.0/32
+!
+interface {{ image.managementPort }}
+!
+interface Vlan4093
+   description iBGP_Peering
+   no autostate
+   ip address 192.168.0.1/30
+!
+interface Vlan4094
+   description MLAG_Peering
+   no autostate
+   ip address 192.168.1.1/30
+!
+{% if image.type == 'ceos' %}
+event-handler renameInterfaces
+   trigger on-boot
+   action bash bash /mnt/flash/renameInterfaces.sh
+   delay 30
+!
+{% endif %}
+ip routing
+!
+mlag configuration
+   domain-id MLAG
+   local-interface Vlan4094
+   peer-address 192.168.1.2
+   peer-link Port-Channel2000
+!
+end

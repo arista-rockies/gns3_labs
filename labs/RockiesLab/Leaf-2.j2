@@ -1,0 +1,60 @@
+no aaa root
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model multi-agent
+!
+hostname Leaf-2
+!
+spanning-tree mode mstp
+!
+interface Ethernet1
+   description Spine-1_eth3
+   no switchport
+   ip address 10.1.2.2/30
+!
+interface Ethernet2
+   description Spine-2_eth3
+   no switchport
+   ip address 10.2.2.2/30
+!
+interface Ethernet3
+!
+interface Ethernet4
+!
+interface Ethernet5
+   description Host-2_eth1
+   switchport mode trunk
+!
+interface Ethernet6
+!
+interface Ethernet7
+!
+interface Ethernet8
+!
+interface Ethernet9
+!
+interface Ethernet10
+!
+interface Ethernet11
+!
+interface Ethernet12
+!
+interface Loopback0
+   ip address 10.0.2.1/32
+!
+interface Loopback1
+   ip address 10.0.2.0/32
+!
+interface {{ image.managementPort }}
+!
+{% if image.type == 'ceos' %}
+event-handler renameInterfaces
+   trigger on-boot
+   action bash bash /mnt/flash/renameInterfaces.sh
+   delay 30
+!
+{% endif %}
+ip routing
+!
+end

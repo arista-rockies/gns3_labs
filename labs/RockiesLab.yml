@@ -1,31 +1,117 @@
 ---
-gns3_project_name: "{{ PREFIX | default('') }}RockiesLab-{{ image.type }}"
+gns3_project_name: "{{ PREFIX }}RockiesLab-{{ image.type }}"
+gns3_nodes_strategy: "none"
 
 gns3_nodes_spec:
   - name: Spine-1
     template: "{{ image.name }}"
+    x: -330.0
+    y: -330.0
+    z: 1.0
+    symbol: ":/symbols/affinity/square/blue/switch_multilayer.svg"
+    customProperties:
+      serialNumber: "Spine-1_{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Spine-1') }}"
+      systemMac: "{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Spine-1') }}"
   - name: Spine-2
     template: "{{ image.name }}"
+    x: -180.0
+    y: -330.0
+    z: 1.0
+    symbol: ":/symbols/affinity/square/blue/switch_multilayer.svg"
+    customProperties:
+      serialNumber: "Spine-2_{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Spine-2') }}"
+      systemMac: "{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Spine-2') }}"
   - name: Leaf-1A
     template: "{{ image.name }}"
+    x: -630.0
+    y: -105.0
+    z: 1.0
+    symbol: ":/symbols/affinity/square/blue/switch_multilayer.svg"
+    customProperties:
+      serialNumber: "Leaf-1A_{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Leaf-1A') }}"
+      systemMac: "{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Leaf-1A') }}"
   - name: Leaf-1B
     template: "{{ image.name }}"
+    x: -480.0
+    y: -105.0
+    z: 1.0
+    symbol: ":/symbols/affinity/square/blue/switch_multilayer.svg"
+    customProperties:
+      serialNumber: "Leaf-1B_{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Leaf-1B') }}"
+      systemMac: "{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Leaf-1B') }}"
   - name: Leaf-2
     template: "{{ image.name }}"
+    x: -255.0
+    y: -105.0
+    z: 1.0
+    symbol: ":/symbols/affinity/square/blue/switch_multilayer.svg"
+    customProperties:
+      serialNumber: "Leaf-2_{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Leaf-2') }}"
+      systemMac: "{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Leaf-2') }}"
   - name: Leaf-3A
     template: "{{ image.name }}"
+    x: -30.0
+    y: -105.0
+    z: 1.0
+    symbol: ":/symbols/affinity/square/blue/switch_multilayer.svg"
+    customProperties:
+      serialNumber: "Leaf-3A_{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Leaf-3A') }}"
+      systemMac: "{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Leaf-3A') }}"
   - name: Leaf-3B
     template: "{{ image.name }}"
+    x: 120.0
+    y: -105.0
+    z: 1.0
+    symbol: ":/symbols/affinity/square/blue/switch_multilayer.svg"
+    customProperties:
+      serialNumber: "Leaf-3B_{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Leaf-3B') }}"
+      systemMac: "{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Leaf-3B') }}"
   - name: Host-1
     template: "{{ image.name }}"
+    x: -555.0
+    y: 45.0
+    z: 1.0
+    symbol: ":/symbols/affinity/square/blue/switch_multilayer.svg"
+    customProperties:
+      serialNumber: "Host-1_{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Host-1') }}"
+      systemMac: "{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Host-1') }}"
   - name: Host-2
     template: "{{ image.name }}"
+    x: -255.0
+    y: 45.0
+    z: 1.0
+    symbol: ":/symbols/affinity/square/blue/switch_multilayer.svg"
+    customProperties:
+      serialNumber: "Host-2_{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Host-2') }}"
+      systemMac: "{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Host-2') }}"
   - name: Host-3
     template: "{{ image.name }}"
+    x: 45.0
+    y: 45.0
+    z: 1.0
+    symbol: ":/symbols/affinity/square/blue/switch_multilayer.svg"
+    customProperties:
+      serialNumber: "Host-3_{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Host-3') }}"
+      systemMac: "{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Host-3') }}"
   - name: Outside
     template: "{{ image.name }}"
+    x: 45.0
+    y: 195.0
+    z: 1.0
+    symbol: ":/symbols/affinity/square/blue/switch_multilayer.svg"
+    customProperties:
+      serialNumber: "Outside_{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Outside') }}"
+      systemMac: "{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Outside') }}"
   - name: Management
     template: "{{ image.name }}"
+    x: 146.0
+    y: -390.0
+    z: 0.0
+    symbol: ":/symbols/affinity/square/blue/switch_multilayer.svg"
+    customProperties:
+      serialNumber: "Management_{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Management') }}"
+      systemMac: "{{ '00:1c:73' | community.general.random_mac(seed=gns3_project_name+'Management') }}"
+
 gns3_links_spec:
   #- [ sw1, port, sw2, port ]
   - [ 'Spine-1',    "{{ image.interfacePrefix }}1", 'Leaf-1A',  "{{ image.interfacePrefix }}1" ]

@@ -54,6 +54,44 @@
       block:
         - import_role:
             name: create_lab
+            
+        # let's load up some configurations
+        - name: loadSwitchConfiguration
+          gns3_node_file:
+            url: "{{ gns3_url }}"
+            port: "{{ gns3_port }}"
+            project_name: "{{ gns3_project_name }}"
+            node_name: "{{ item.name }}"
+            dest: "mnt/flash/startup-config"
+            data: "{{ lookup('template', 'labs/'+lab+'/'+item.name+'.j2') }}"
+          loop: "{{ gns3_nodes_spec }}"
+          loop_control:
+            label: "startup config for {{ item.name }}"
+
+        - name: loadOSConfiguration
+          gns3_node_file:
+            url: "{{ gns3_url }}"
+            port: "{{ gns3_port }}"
+            project_name: "{{ gns3_project_name }}"
+            node_name: "{{ item.name }}"
+            dest: "mnt/flash/{{ image.type }}-config"
+            data: "{{ lookup('template', 'labs/'+lab+'/eos-config.j2') }}"
+          loop: "{{ gns3_nodes_spec }}"
+          loop_control:
+            label: "{{ image.type }} config for {{ item.name }}"
+
+        - name: renameInterfaces
+          gns3_node_file:
+            url: "{{ gns3_url }}"
+            port: "{{ gns3_port }}"
+            project_name: "{{ gns3_project_name }}"
+            node_name: "{{ item.name }}"
+            dest: "mnt/flash/renameInterfaces.sh"
+            data: "{{ lookup('template', 'labs/'+lab+'/renameInterfaces.sh') }}"
+          loop: "{{ gns3_nodes_spec }}"
+          loop_control:
+            label: "renameInterfaces for {{ item.name }}"
+          when: image.type == "ceos"
 
     - name: delete
       when: execute == "delete"
