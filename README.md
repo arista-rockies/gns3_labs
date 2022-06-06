@@ -19,7 +19,7 @@ you'll need to create a local.yml in the vars directory that contains details sp
 to execute the lab issue a command as follows:
 
 ```
-ansible-playbook base.yml -e execute=VERB -e lab=LABNAME -e imageType=IMAGETYPE -vvvv
+ansible-playbook labs.yml -e execute=VERB -e lab=LABNAME -e imageType=IMAGETYPE -vvvv
 ```
 
 where
