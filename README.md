@@ -39,13 +39,17 @@ MGMT_INTF=et0
 to execute the lab issue a command as follows:
 
 ```
-ansible-playbook labs.yml -e execute=VERB -e lab=LABNAME -e imageType=IMAGETYPE -vvvv
+ansible-playbook -i labs/RockiesLab/inventory.yml labs.yml -e execute=VERB -e imageType=IMAGETYPE
 ```
 
 where
 * VERB is either create or delete depending on which operation you'd like to complete.  if not specified, defaults to create
-* LABNAME is the name of the lab you'd like to operate on.  labs are provided in the labs subdirectory.  the LABNAME option should match the filename of the lab *without* the file extension
 * IMAGETYPE default to "ceos".  viable options are defined in your local.yml file in a structure called "images".  if the specified value does not exist or is not present in local.yml the default is used.
+
+
+## AVD
+
+the system supports generating avd based configurations for your labs. in order to support this, you must create a group_vars folder inside the lab accordingly per the avd documentation and set hasAVD=true in your lab file.  generated configurations are stored in the labfolder's files directory structure.
 
 
 
