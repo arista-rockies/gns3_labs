@@ -1,0 +1,5 @@
+---
+# this inventory is likely to not need modifications.  it *must* have localhost in it
+all:
+  hosts:
+    localhost:

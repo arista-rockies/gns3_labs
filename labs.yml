@@ -1,12 +1,102 @@
 ---
+- name: main
+  gather_facts: no
+  hosts: localhost
+  tasks:
+    - set_fact:
+        lab: "{{ inventory_file | relpath('labs/') | dirname }}"
+        avdOnly: "{{ avdOnly | default('n') }}"
+        execute: "{{ execute | default('create') }}"
+
+    # load in our local variable settings which gives us the gns3 server ip and other sundry variables
+    - name: loadLocalSettings
+      ansible.builtin.include_vars:
+        file: "vars/local.yml"
+      no_log: true
+
+    # because we can't set and use a variable in the same set_fact we need to have a separate task
+    #   to default these values
+    - name: setImageType
+      set_fact:
+        imageType: "{{ imageType | default('ceos') }}"
+      no_log: false
+
+    # pull out a single image from the images dict loaded from local.yml
+    - name: chooseImage
+      set_fact:
+        image: "{{ {} | combine((imageType in images) | ternary(images[imageType], images.ceos)) }}"
+      no_log: True
+
+    - name: loadTheLab
+      include_vars:
+        file: "labs/{{ lab }}/lab.yml"
+      no_log: true
+
+    - name: hasAVD
+      set_fact:
+        hasAVD: "{{ hasAVD | default(false)| bool }}"
+      no_log: true
+
+    # loop over the devices in the lab
+    #   this task is only needed if we have avd.  otherwise we can just skip it
+    #   that will happen because there are no items in the mainFabric group
+    - name: updateAnsibleInventory
+      add_host:
+        name: "{{ item.name }}"
+        groups: "{{ item.customProperties.avdGroups }}"
+        inventory_dir: "{{ inventory_dir }}/files/"
+        hasAVD: "{{ hasAVD }}"
+      with_items: "{{ hostvars['localhost']['gns3_nodes_spec'] }}"
+      when: item.customProperties.avdGroups is defined and hasAVD == true
+      loop_control:
+        label: "{{ item.name }}"
+        #no_log: true
+
+# ---------------------- play to generate the avd based configurations
+- name: avdGeneration
+  gather_facts: no
+  hosts: mainFabric
+  connection: local
+  tasks:
+    - set_fact:
+        avdOnly: "{{ avdOnly | default('y') }}"
+        execute: "{{ execute | default('create') }}"
+
+    - name: exitIfDeleteOrNoAVD
+      meta: end_play
+      when: execute == "delete" or hasAVD == false 
+
+    # this is a hack around a bug in avd >= 3.5.0 where avd is not templating
+    #   the fabric_name.  this causes avd to fail miserably when fabric_name
+    #   is a jinja templated variable
+    - name: setFact
+      set_fact:
+        fabric_name: "{{ lookup('ansible.builtin.vars', 'fabric_name') }}"
+
+    - name: Generate Structured Variables per Device
+      import_role:
+        name: arista.avd.eos_designs
+
+    - name: Generate Intended Config and Documentation
+      import_role:
+        name: arista.avd.eos_cli_config_gen
+
+# ---------------------- play to create the lab and push configurations
 - name: labScript
   hosts: localhost
   gather_facts: false
+  connection: local
 
   collections:
     - davidban77.gns3
 
   tasks:
+    #
+    - name: exitIfAVDOnly
+      meta: end_play
+      when: avdOnly == "y"
+
+    #
     # we want to install the gns3fy pip package only if it's not installed.  get a list of installed pips
     - community.general.pip_package_info:
       register: pips
@@ -39,19 +129,34 @@
       no_log: True
 
     # load the lab and fill in any variable substituions
-    - name: loadLab
-      ansible.builtin.include_vars:
-        file: "labs/{{ lab }}.yml"
-      no_log: true
+    - name: loadTheLab
+      include_vars:
+        file: "labs/{{ lab }}/lab.yml"
 
-    - name: Operation
-      debug:
-        msg: "Running {{ execute }} for Lab: {{ gns3_project_name }}"
+    - name: setConfigPath
+      set_fact:
+        baseFilePath: "labs/{{ lab }}/files/"
+        configPath: "labs/{{ lab }}/files/{{ (hasAVD == true) | ternary('intended/configs/', '') }}"
 
     # call the right role to either create or delete the lab
+    - name: delete
+      when: execute == "delete"
+      block:
+        - name: Operation
+          debug:
+            msg: "Running delete for Lab: {{ gns3_project_name }}"
+
+        - import_role:
+            name: delete_lab
+
     - name: create
       when: execute == "create"
       block:
+        - name: Operation
+          debug:
+            msg: "Running create for Lab: {{ gns3_project_name }}"
+
+        # this will contact the gns3 server and create the lab as defined in the lab.yml file
         - import_role:
             name: create_lab
             
@@ -63,10 +168,12 @@
             project_name: "{{ gns3_project_name }}"
             node_name: "{{ item.name }}"
             dest: "mnt/flash/startup-config"
-            data: "{{ lookup('template', 'labs/'+lab+'/'+item.name+'.j2') }}"
+            data: "{{ lookup('template', configPath+item.name+'.cfg', errors='ignore') }}"
           loop: "{{ gns3_nodes_spec }}"
           loop_control:
             label: "startup config for {{ item.name }}"
+          when: item.template == image.name
+          ignore_errors: true
 
         - name: loadOSConfiguration
           gns3_node_file:
@@ -75,10 +182,11 @@
             project_name: "{{ gns3_project_name }}"
             node_name: "{{ item.name }}"
             dest: "mnt/flash/{{ image.type }}-config"
-            data: "{{ lookup('template', 'labs/'+lab+'/eos-config.j2') }}"
+            data: "{{ lookup('template', baseFilePath+'eos-config.j2') }}"
           loop: "{{ gns3_nodes_spec }}"
           loop_control:
             label: "{{ image.type }} config for {{ item.name }}"
+          when: item.template == image.name
 
         - name: renameInterfaces
           gns3_node_file:
@@ -87,15 +195,8 @@
             project_name: "{{ gns3_project_name }}"
             node_name: "{{ item.name }}"
             dest: "mnt/flash/renameInterfaces.sh"
-            data: "{{ lookup('template', 'labs/'+lab+'/renameInterfaces.sh') }}"
+            data: "{{ lookup('template', baseFilePath+'renameInterfaces.sh') }}"
           loop: "{{ gns3_nodes_spec }}"
           loop_control:
             label: "renameInterfaces for {{ item.name }}"
-          when: image.type == "ceos"
-
-    - name: delete
-      when: execute == "delete"
-      block:
-        - import_role:
-            name: delete_lab
-
+          when: image.type == "ceos" and item.template == image.name

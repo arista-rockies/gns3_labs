@@ -12,3 +12,5 @@ collections:
   - name: https://github.com/fatpelt/ansible-collection-gns3.git
     type: git
     version: master
+
+  - name: arista.avd
