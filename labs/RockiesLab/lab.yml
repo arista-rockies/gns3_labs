@@ -1,5 +1,5 @@
 ---
-hasAVD: true
+hasAVD: false
 
 gns3_project_name: "{{ PREFIX }}RockiesLab-{{ image.type }}"
 gns3_nodes_strategy: "none"
